@@ -104,5 +104,21 @@ exports.parseMarkdown = parseMarkdown;
 exports.toParseFive = body => {
   const html = parseHtml(body, getCurrentVersion());
   const parsed = parse5.parse(html, { sourceCodeLocationInfo: false });
+
+  return Flatted.stringify(parsed);
+};
+
+exports.parseToc = body => {
+  const html = parseHtml(body, getCurrentVersion());
+  const parsed = parse5.parse(html, { sourceCodeLocationInfo: false });
+
+  recursivePrint = (parsed, level) => {
+    console.log(level, parsed.nodeName, parsed.value, parsed.childNodes.length);
+    if (parsed.nodeName == "ul") {
+      recursivePrint(parsed.childNodes[1], level + 1);
+    }
+    parsed.childNodes.map(node => recursivePrint(node, level + 1));
+  };
+  recursivePrint(parsed, 0);
   return Flatted.stringify(parsed);
 };

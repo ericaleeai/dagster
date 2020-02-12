@@ -24,6 +24,8 @@ const SphinxPage = ({ pageContext: ctx }) => {
     setShowToc(false);
   }
 
+  console.log(page);
+  console.log(page.tocParsed);
   return (
     <Layout>
       <SEO title={page.title} />
