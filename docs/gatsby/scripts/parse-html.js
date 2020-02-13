@@ -113,11 +113,19 @@ exports.parseToc = body => {
   const parsed = parse5.parse(html, { sourceCodeLocationInfo: false });
 
   recursivePrint = (parsed, level) => {
-    console.log(level, parsed.nodeName, parsed.value, parsed.childNodes.length);
-    if (parsed.nodeName == "ul") {
-      recursivePrint(parsed.childNodes[1], level + 1);
+    console.log(
+      level,
+      parsed.nodeName,
+      parsed.value,
+      parsed.childNodes && parsed.childNodes.length
+    );
+    // console.log(parsed.childNodes);
+    // if (parsed.nodeName == "ul") {
+    //   recursivePrint(parsed.childNodes[1], level + 1);
+    // }
+    if (parsed.childNodes) {
+      parsed.childNodes.map(node => recursivePrint(node, level + 1));
     }
-    parsed.childNodes.map(node => recursivePrint(node, level + 1));
   };
   recursivePrint(parsed, 0);
   return Flatted.stringify(parsed);
