@@ -20,7 +20,7 @@ export const wrapper = {
     fontSize: 0,
     opacity: 0.4
   },
-  "&.toctree-l2 a:hover": {
+  "&.toctree-l2 a:hover, &.toctree-l2 a.active": {
     opacity: 1
   },
   "&.toctree-l2 > ul": {
