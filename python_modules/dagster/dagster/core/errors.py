@@ -152,12 +152,14 @@ def user_code_error_boundary(error_cls, msg_fn, **kwargs):
             call_user_provided_function()
 
     '''
+    from dagster.core.definitions.events import DagsterEventException
+
     check.callable_param(msg_fn, 'msg_fn')
     check.subclass_param(error_cls, 'error_cls', DagsterUserCodeExecutionError)
 
     try:
         yield
-    except DagsterError as de:
+    except (DagsterError, DagsterEventException) as de:
         # The system has thrown an error that is part of the user-framework contract
         raise de
     except Exception as e:  # pylint: disable=W0703

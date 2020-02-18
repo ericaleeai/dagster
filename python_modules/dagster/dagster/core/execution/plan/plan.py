@@ -479,6 +479,11 @@ class ActiveExecution(object):
         self._skipped.add(step_key)
         self._mark_complete(step_key)
 
+    def mark_retry(self, step_key):
+        self._pending[step_key] = self._plan.execution_deps()[step_key]
+        self._in_flight.remove(step_key)
+        self._update()
+
     def _mark_complete(self, step_key):
         check.invariant(
             step_key not in self._completed,
@@ -501,6 +506,8 @@ class ActiveExecution(object):
             self.mark_failed(dagster_event.step_key)
         elif dagster_event.is_step_success:
             self.mark_success(dagster_event.step_key)
+        elif dagster_event.is_step_retry:
+            self.mark_retry(dagster_event.step_key)
 
     def verify_complete(self, pipeline_context, step_key):
         if step_key in self._in_flight:

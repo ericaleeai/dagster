@@ -31,6 +31,10 @@ class DagsterEventType(Enum):
     STEP_START = 'STEP_START'
     STEP_SUCCESS = 'STEP_SUCCESS'
     STEP_SKIPPED = 'STEP_SKIPPED'
+
+    STEP_RETRY = 'STEP_RETRY'  # "failed" but want to retry
+    # STEP_RESTART = 'STEP_RESTART'
+
     STEP_MATERIALIZATION = 'STEP_MATERIALIZATION'
     STEP_EXPECTATION_RESULT = 'STEP_EXPECTATION_RESULT'
 
@@ -250,6 +254,10 @@ class DagsterEvent(
         return self.event_type == DagsterEventType.STEP_FAILURE
 
     @property
+    def is_step_retry(self):
+        return self.event_type == DagsterEventType.STEP_RETRY
+
+    @property
     def is_failure(self):
         return self.event_type in FAILURE_EVENTS
 
@@ -354,6 +362,17 @@ class DagsterEvent(
             step_context=step_context,
             event_specific_data=step_failure_data,
             message='Execution of step "{step_key}" failed.'.format(step_key=step_context.step.key),
+        )
+
+    @staticmethod
+    def step_retry_event(step_context, step_retry_data):
+        return DagsterEvent.from_step(
+            event_type=DagsterEventType.STEP_RETRY,
+            step_context=step_context,
+            event_specific_data=step_retry_data,
+            message='Execution of step "{step_key}" failed and has requested a retry.'.format(
+                step_key=step_context.step.key
+            ),
         )
 
     @staticmethod

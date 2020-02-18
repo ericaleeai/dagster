@@ -2,7 +2,13 @@ import os
 import sys
 
 from dagster import EventMetadataEntry, check
-from dagster.core.definitions import ExpectationResult, Materialization, Output, TypeCheck
+from dagster.core.definitions import (
+    ExpectationResult,
+    Materialization,
+    Output,
+    RetryPrototype,
+    TypeCheck,
+)
 from dagster.core.errors import (
     DagsterError,
     DagsterExecutionStepExecutionError,
@@ -27,6 +33,7 @@ from dagster.core.execution.plan.objects import (
     StepInputData,
     StepOutputData,
     StepOutputHandle,
+    StepRetryData,
     StepSuccessData,
     TypeCheckData,
     UserFailureData,
@@ -258,6 +265,11 @@ def dagster_event_sequence_for_step(step_context):
     try:
         for step_event in check.generator(_core_dagster_event_sequence_for_step(step_context)):
             yield step_event
+
+    except RetryPrototype:
+        yield DagsterEvent.step_retry_event(
+            step_context, StepRetryData(error=serializable_error_info_from_exc_info(sys.exc_info()))
+        )
 
     # case (1) in top comment
     except DagsterUserCodeExecutionError as dagster_user_error:  # case (1) above

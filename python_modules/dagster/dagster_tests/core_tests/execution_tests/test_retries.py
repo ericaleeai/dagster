@@ -1,6 +1,15 @@
 # pylint: disable=no-value-for-parameter
 
-from dagster import Output, OutputDefinition, RunConfig, execute_pipeline, pipeline, solid
+from dagster import (
+    Output,
+    OutputDefinition,
+    RetryPrototype,
+    RunConfig,
+    execute_pipeline,
+    lambda_solid,
+    pipeline,
+    solid,
+)
 from dagster.core.instance import DagsterInstance
 
 
@@ -60,3 +69,24 @@ def test_retries():
         e for e in second_result.event_list if str(e.solid_handle) == 'will_be_skipped'
     ][0]
     assert str(will_be_skipped.event_type_value) == 'STEP_SKIPPED'
+
+
+def test_step_retry():
+
+    fail = {'count': 0}
+
+    @lambda_solid
+    def fail_first_time():
+        if fail['count'] < 1:
+            fail['count'] += 1
+            raise RetryPrototype()
+
+        return 'okay perfect'
+
+    @pipeline
+    def step_retry():
+        fail_first_time()
+
+    result = execute_pipeline(step_retry)
+    assert result.success
+    # result.event_list

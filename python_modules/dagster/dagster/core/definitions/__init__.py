@@ -34,6 +34,7 @@ from .events import (
     Materialization,
     Output,
     PathMetadataEntryData,
+    RetryPrototype,
     TextMetadataEntryData,
     TypeCheck,
     UrlMetadataEntryData,
